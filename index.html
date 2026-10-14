@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Подземка — независимые места Москвы</title>
+<meta name="description" content="Независимый гид по барам, клубам, арт-пространствам и стрит-арту Москвы, которых нет в туристических путеводителях.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+/* Раскладка: узкая колонка на телефоне, сетка карточек на планшете и десктопе. Один синий акцент на светло-сером фоне. */
+:root{
+  --bg:#f3f5f8;
+  --surface:#ffffff;
+  --ink:#10131c;
+  --muted:#5b6475;
+  --line:#dfe3ea;
+  --accent:#1c34c8;
+  --accent-ink:#ffffff;
+  --accent-soft:#e7eafb;
+  --font-body:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-display:"Unbounded","Inter",system-ui,sans-serif;
+  --radius:10px;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:var(--font-body);font-size:16px;line-height:1.55;
+  -webkit-text-size-adjust:100%;
+}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{width:100%;max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* Шапка */
+header.top{position:sticky;top:0;z-index:20;background:rgba(243,245,248,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px}
+.logo{font-family:var(--font-display);font-weight:700;font-size:18px;letter-spacing:-.02em;text-decoration:none;color:var(--ink)}
+.logo span{color:var(--accent)}
+nav ul{list-style:none;margin:0;padding:0;display:flex;gap:4px}
+nav a{display:block;padding:8px 12px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:500;color:var(--muted)}
+nav a:hover{color:var(--ink);background:var(--surface)}
+nav a[aria-current="page"]{color:var(--accent-ink);background:var(--accent)}
+.burger{display:none;width:44px;height:44px;border:1px solid var(--line);background:var(--surface);border-radius:10px;cursor:pointer;align-items:center;justify-content:center}
+.burger svg{width:22px;height:22px}
+@media (max-width:860px){
+  .burger{display:inline-flex}
+  nav{position:absolute;left:0;right:0;top:100%;background:var(--surface);border-bottom:1px solid var(--line);display:none}
+  nav.open{display:block}
+  nav ul{flex-direction:column;padding:8px max(16px,env(safe-area-inset-left,0px)) 16px;gap:2px}
+  nav a{padding:12px;font-size:16px}
+}
+
+/* Общие блоки */
+main{padding-block:32px 64px}
+.page{display:none}
+.page.active{display:block}
+h1,h2,h3{font-family:var(--font-display);letter-spacing:-.025em;line-height:1.15;margin:0;text-wrap:balance}
+h1{font-size:clamp(28px,6.4vw,52px);font-weight:700}
+h2{font-size:clamp(22px,4.6vw,32px);font-weight:700}
+h3{font-size:18px;font-weight:500;letter-spacing:-.015em}
+p{margin:0}
+.lead{color:var(--muted);font-size:clamp(16px,2.6vw,19px);max-width:62ch}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.section{display:flex;flex-direction:column;gap:20px;margin-top:56px}
+.section-head{display:flex;flex-direction:column;gap:8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border-radius:10px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);font-weight:600;font-size:15px;text-decoration:none;cursor:pointer}
+.btn:hover{filter:brightness(1.1)}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.ghost:hover{background:var(--accent-soft);filter:none}
+.btn-row{display:flex;flex-wrap:wrap;gap:12px}
+
+/* Главная: вступление */
+.hero{display:flex;flex-direction:column;gap:20px;padding-block:24px 8px}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.stats{display:flex;flex-wrap:wrap;gap:8px 28px;margin-top:8px;font-size:14px;color:var(--muted)}
+.stats b{font-size:20px;color:var(--ink);font-weight:700;margin-right:6px;font-variant-numeric:tabular-nums}
+
+/* Карточки разделов */
+.sections-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.sec-card{display:flex;flex-direction:column;gap:6px;padding:18px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);text-decoration:none}
+.sec-card:hover{border-color:var(--accent)}
+.sec-card small{color:var(--muted);font-size:14px}
+.sec-card strong{font-size:17px}
+.sec-card span.arrow{color:var(--accent);font-weight:600;margin-top:4px}
+
+/* Карточки мест */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+.card{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;min-width:0}
+.photo{aspect-ratio:16/9;max-width:100%;display:flex;align-items:flex-end;padding:12px 14px;position:relative;overflow:hidden;color:#fff}
+.photo::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(255,255,255,.07) 0 2px,transparent 2px 14px)}
+.photo .mono{position:relative;font-family:var(--font-display);font-weight:700;font-size:34px;letter-spacing:-.03em;line-height:1;opacity:.92}
+.photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.photo.club{background:linear-gradient(140deg,#1c34c8,#101b6e)}
+.photo.art{background:linear-gradient(140deg,#2b2f3d,#0d0f16)}
+.photo.street{background:linear-gradient(140deg,#4a5ad6,#1c34c8 60%,#0e1a78)}
+.card-body{display:flex;flex-direction:column;gap:8px;padding:16px;flex:1}
+.tag{display:inline-flex;align-self:flex-start;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:3px 8px;border-radius:6px}
+.card h3{overflow-wrap:anywhere}
+.meta{font-size:14px;color:var(--muted);overflow-wrap:anywhere}
+.meta b{color:var(--ink);font-weight:600}
+.card .more{margin-top:auto;padding-top:8px;align-self:flex-start;background:none;border:0;padding-left:0;color:var(--accent);font-weight:600;cursor:pointer;font-size:15px}
+.card .more:hover{text-decoration:underline}
+
+/* Управление: поиск, фильтры */
+.explorer{display:flex;flex-direction:column;gap:16px}
+.controls{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:700px){.controls{grid-template-columns:2fr 1fr}}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field label{font-size:13px;font-weight:600;color:var(--muted)}
+.field input,.field select,.field textarea{width:100%;min-height:46px;padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.field textarea{min-height:110px;resize:vertical}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-weight:500;font-size:14px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.count{font-size:14px;color:var(--muted)}
+.empty{padding:32px 16px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:var(--radius)}
+
+/* Карта */
+.map{height:340px;width:100%;max-width:100%;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:#e8ebf1;z-index:0}
+@media (min-width:860px){.map{height:420px}}
+.map-note{font-size:13px;color:var(--muted)}
+.leaflet-popup-content{font-family:var(--font-body);margin:12px 14px}
+.pop-title{font-weight:700;display:block;margin-bottom:2px}
+.pop-btn{margin-top:8px;border:0;background:var(--accent);color:#fff;padding:6px 12px;border-radius:8px;font-weight:600;cursor:pointer}
+
+/* Маршруты */
+.route-tabs{display:flex;flex-wrap:wrap;gap:8px}
+.route{display:grid;grid-template-columns:1fr;gap:20px}
+@media (min-width:900px){.route{grid-template-columns:minmax(0,5fr) minmax(0,6fr);align-items:start}}
+.route-info{display:flex;flex-direction:column;gap:16px;min-width:0}
+.facts{display:flex;flex-wrap:wrap;gap:8px 24px;font-size:14px;color:var(--muted)}
+.facts b{color:var(--ink)}
+ol.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0;counter-reset:s}
+ol.steps li{position:relative;padding:0 0 18px 44px;counter-increment:s;min-width:0}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:0;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center}
+ol.steps li::after{content:"";position:absolute;left:14px;top:34px;bottom:4px;width:2px;background:var(--line)}
+ol.steps li:last-child::after{display:none}
+ol.steps b{display:block}
+ol.steps span{display:block;font-size:14px;color:var(--muted);overflow-wrap:anywhere}
+
+/* О проекте и форма */
+.two{display:grid;grid-template-columns:1fr;gap:24px}
+@media (min-width:860px){.two{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.cta{display:flex;flex-direction:column;gap:12px;background:var(--ink);color:#fff;border-radius:var(--radius);padding:28px 20px;align-items:flex-start}
+.cta p{color:#c3c9d6;max-width:56ch}
+.cta .btn{background:#fff;color:var(--ink);border-color:#fff}
+.note{font-size:14px;color:var(--muted)}
+.form-out{display:none;flex-direction:column;gap:10px;padding:14px;background:var(--accent-soft);border-radius:10px;font-size:14px}
+.form-out.show{display:flex}
+.form-out pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--font-body)}
+
+/* Подробная карточка */
+dialog{border:0;border-radius:14px;padding:0;width:min(560px,calc(100% - 24px));max-height:calc(100% - 24px);background:var(--surface);color:var(--ink)}
+dialog::backdrop{background:rgba(10,12,20,.55)}
+.dlg{display:flex;flex-direction:column}
+.dlg .photo{aspect-ratio:21/9}
+.dlg-body{display:flex;flex-direction:column;gap:12px;padding:20px}
+.dlg-close{position:absolute;right:10px;top:10px;z-index:2;width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:var(--ink);font-size:22px;cursor:pointer;line-height:1}
+.dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:15px;margin:0}
+.dl dt{color:var(--muted)}
+.dl dd{margin:0;overflow-wrap:anywhere}
+
+footer{border-top:1px solid var(--line);padding-block:24px 40px;color:var(--muted);font-size:14px}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="#home" data-nav="home">ПОД<span>ЗЕМКА</span></a>
+    <button class="burger" id="burger" aria-label="Открыть меню" aria-expanded="false" aria-controls="nav">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <nav id="nav" aria-label="Основное меню">
+      <ul>
+        <li><a href="#home" data-nav="home">Главная</a></li>
+        <li><a href="#clubs" data-nav="clubs">Клубы и бары</a></li>
+        <li><a href="#art" data-nav="art">Арт-пространства</a></li>
+        <li><a href="#street" data-nav="street">Стрит-арт</a></li>
+        <li><a href="#routes" data-nav="routes">Маршруты</a></li>
+        <li><a href="#about" data-nav="about">О проекте</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ГЛАВНАЯ -->
+  <section class="page" id="page-home" aria-labelledby="h-home">
+    <div class="hero">
+      <span class="eyebrow">Независимый гид по Москве</span>
+      <h1 id="h-home">Места, о которых <em>не пишут</em> в путеводителях</h1>
+      <p class="lead">Бары, клубы, арт-пространства и стрит-арт для тех, кто ищет город за пределами туристических маршрутов. Всё собрано в одном месте, с картой, фильтрами и готовыми прогулками.</p>
+      <div class="btn-row">
+        <a class="btn" href="#explore" id="goExplore">Смотреть все места</a>
+        <a class="btn ghost" href="#routes" data-nav="routes">Готовые маршруты</a>
+      </div>
+      <div class="stats" id="stats"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <h2>Сейчас в подборке</h2>
+        <p class="lead">Шесть мест, с которых удобно начать.</p>
+      </div>
+      <div class="grid" id="featured"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><h2>Разделы</h2></div>
+      <div class="sections-grid">
+        <a class="sec-card" href="#clubs" data-nav="clubs"><strong>Клубы и бары</strong><small>Концертные площадки, DIY-бары, рюмочные</small><span class="arrow">Открыть →</span></a>
+        <a class="sec-card" href="#art" data-nav="art"><strong>Арт-пространства</strong><small>Галереи, мастерские, кластеры</small><span class="arrow">Открыть →</span></a>
+        <a class="sec-card" href="#street" data-nav="street"><strong>Стрит-арт и дворы</strong><small>Улицы и районы с граффити</small><span class="arrow">Открыть →</span></a>
+        <a class="sec-card" href="#routes" data-nav="routes"><strong>Маршруты</strong><small>Пешие прогулки по центру и востоку</small><span class="arrow">Открыть →</span></a>
+      </div>
+    </div>
+
+    <div class="section" id="explore">
+      <div class="section-head">
+        <h2>Все места на карте</h2>
+        <p class="lead">Фильтруйте по типу и станции метро или ищите по названию и адресу.</p>
+      </div>
+      <div class="explorer" id="ex-home"></div>
+    </div>
+
+    <div class="section">
+      <div class="cta">
+        <h2>Знаете место, которого здесь нет?</h2>
+        <p>Расскажите про бар, двор или галерею. Мы проверим и добавим на карту.</p>
+        <a class="btn" href="#about" data-nav="about" data-scroll="suggest">Предложить место</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- КЛУБЫ И БАРЫ -->
+  <section class="page" id="page-clubs" aria-labelledby="h-clubs">
+    <div class="section-head" style="gap:12px">
+      <span class="eyebrow">Раздел</span>
+      <h1 id="h-clubs">Клубы и бары</h1>
+      <p class="lead">Независимые музыкальные площадки, DIY-бары и рюмочные. От панк-подвалов до концертных залов.</p>
+    </div>
+    <div class="section" style="margin-top:28px"><div class="explorer" id="ex-clubs"></div></div>
+  </section>
+
+  <!-- АРТ -->
+  <section class="page" id="page-art" aria-labelledby="h-art">
+    <div class="section-head" style="gap:12px">
+      <span class="eyebrow">Раздел</span>
+      <h1 id="h-art">Арт-пространства</h1>
+      <p class="lead">Небольшие галереи, мастерские и независимые кластеры, где можно увидеть современное искусство без очередей.</p>
+    </div>
+    <div class="section" style="margin-top:28px"><div class="explorer" id="ex-art"></div></div>
+  </section>
+
+  <!-- СТРИТ-АРТ -->
+  <section class="page" id="page-street" aria-labelledby="h-street">
+    <div class="section-head" style="gap:12px">
+      <span class="eyebrow">Раздел</span>
+      <h1 id="h-street">Стрит-арт и дворы</h1>
+      <p class="lead">Районы и конкретные точки, где город говорит стенами. Для районов точка на карте показывает центр зоны, а не конкретный дом.</p>
+    </div>
+    <div class="section" style="margin-top:28px"><div class="explorer" id="ex-street"></div></div>
+  </section>
+
+  <!-- МАРШРУТЫ -->
+  <section class="page" id="page-routes" aria-labelledby="h-routes">
+    <div class="section-head" style="gap:12px">
+      <span class="eyebrow">Пешие прогулки</span>
+      <h1 id="h-routes">Маршруты</h1>
+      <p class="lead">Три готовых маршрута по ключевым районам. Время указано с остановками, без учёта очередей и длинных посиделок.</p>
+    </div>
+    <div class="section" style="margin-top:28px">
+      <div class="route-tabs" id="routeTabs" role="group" aria-label="Выбор маршрута"></div>
+      <div class="route" id="routeView"></div>
+    </div>
+  </section>
+
+  <!-- О ПРОЕКТЕ -->
+  <section class="page" id="page-about" aria-labelledby="h-about">
+    <div class="section-head" style="gap:12px">
+      <span class="eyebrow">О проекте</span>
+      <h1 id="h-about">Город глазами тех, кто в нём ходит</h1>
+    </div>
+    <div class="section two" style="margin-top:28px">
+      <div class="panel">
+        <h2>Зачем это нужно</h2>
+        <p>Информация о независимых местах рассыпана по соцсетям, каналам и чужим сторис. «Подземка» собирает её в одном месте: адрес, метро, атмосфера и карта.</p>
+        <p>Сайт для тех, кому 16–25 и кто любит альтернативную музыку, искусство, уличную культуру и прогулки по городу.</p>
+        <h3>Создатель</h3>
+        <p>Проект сделан одним человеком, который любит ходить по Москве пешком. Замените этот текст рассказом о себе в файле index.html, в блоке «О проекте».</p>
+        <p class="note">Адреса и описания собраны по открытым данным. Перед визитом проверьте часы работы и афишу: независимые площадки меняются быстро.</p>
+      </div>
+      <div class="panel" id="suggest">
+        <h2>Предложить место</h2>
+        <form id="suggestForm" novalidate>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div class="field"><label for="f-name">Название</label><input id="f-name" name="name" required autocomplete="off"></div>
+            <div class="field"><label for="f-addr">Адрес</label><input id="f-addr" name="addr" required autocomplete="off"></div>
+            <div class="field"><label for="f-type">Тип места</label>
+              <select id="f-type" name="type"><option>Клуб или бар</option><option>Арт-пространство</option><option>Стрит-арт</option></select></div>
+            <div class="field"><label for="f-why">Чем оно интересно</label><textarea id="f-why" name="why"></textarea></div>
+            <div class="field"><label for="f-link">Ссылка на соцсети или сайт</label><input id="f-link" name="link" inputmode="url" autocomplete="off"></div>
+            <button class="btn" type="submit">Отправить по почте</button>
+            <p class="note" id="formErr" role="alert" hidden>Заполните название и адрес.</p>
+          </div>
+        </form>
+        <div class="form-out" id="formOut"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Подземка · независимый гид по Москве</span>
+    <span>Карта © участники OpenStreetMap</span>
+  </div>
+</footer>
+
+<dialog id="dlg" aria-label="Карточка места"></dialog>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* Куда приходят предложения мест. Замените на свою почту. */
+var SUGGEST_EMAIL = "podzemka@example.com";
+
+/* Категории */
+var CATS = {
+  club:{label:"Клуб / бар"},
+  art:{label:"Арт-пространство"},
+  street:{label:"Стрит-арт"}
+};
+
+/* Данные о местах. Координаты приблизительные, для карты.
+   Чтобы добавить место, допишите строку в этот список. */
+var PLACES = [
+ /* Клубы и бары */
+ {id:"powerhouse",name:"Powerhouse Moscow",addr:"Гончарная ул., 7/4",metro:"Таганская",cat:"club",lat:55.7413,lng:37.6528,
+  desc:"Бар для тех, кто любит рок и тяжёлую музыку. Тёмный зал, громкий звук и публика, которая приходит ради музыки."},
+ {id:"jao",name:"Китайский лётчик Джао Да",addr:"Лубянский проезд, 25, стр. 1",metro:"Китай-город",cat:"club",lat:55.7571,lng:37.6300,
+  desc:"Знаменитый клуб с концертами и вечеринками. Сюда приходят за живой музыкой и неформальной атмосферой в самом центре."},
+ {id:"16tons",name:"16 Тонн",addr:"Пресненский Вал, 6, стр. 1",metro:"Улица 1905 года",cat:"club",lat:55.7667,lng:37.5612,
+  desc:"Концертный клуб с большой сценой, куда ходят на выступления разных жанров. Хорошая точка для вечера с живым звуком."},
+ {id:"blanc",name:"Blanc",addr:"Хохловский пер., 7/9, стр. 5",metro:"Китай-город",cat:"club",lat:55.7518,lng:37.6482,
+  desc:"Камерная площадка в тихом переулке у Хохловской площади. Подходит, если хочется спокойнее, чем в центре."},
+ {id:"rovesnik",name:"Ровесник",addr:"Малый Гнездниковский пер., 9, стр. 2",metro:"Пушкинская",cat:"club",lat:55.7619,lng:37.6046,
+  desc:"Бар в переулке рядом с Тверской. Удобная остановка в центре, где можно переждать суету улицы."},
+ {id:"punkfiction",name:"Punk Fiction",addr:"Ольховская ул., 14, стр. 1",metro:"Красносельская",cat:"club",lat:55.7810,lng:37.6694,
+  desc:"Панк-бар для тех, кто ценит громкую и честную музыку. Без глянца, зато с характером."},
+ {id:"urban",name:"Урбан",addr:"Большая Новодмитровская ул., 36",metro:"Дмитровская",cat:"club",lat:55.8049,lng:37.5868,
+  desc:"Площадка на территории дизайн-завода. Рядом можно погулять среди других креативных пространств."},
+ {id:"svoboda",name:"Свобода",addr:"Кривоколенный пер., 14, стр. 1",metro:"Тургеневская",cat:"club",lat:55.7580,lng:37.6395,
+  desc:"Бар в районе Чистых прудов с неформальной атмосферой. Хорошо сочетается с прогулкой по Покровке."},
+ {id:"defaqto",name:"DeFAQto",addr:"Большая Лубянка, 30/2",metro:"Лубянка",cat:"club",lat:55.7640,lng:37.6350,
+  desc:"Бар недалеко от Сретенки. Подойдёт для вечера, когда хочется остаться в центре, но подальше от толп."},
+ {id:"drunkpunk",name:"Drunk Punk Craft Bar",addr:"Нижний Сусальный пер., 5, стр. 2",metro:"Курская",cat:"club",lat:55.7573,lng:37.6572,
+  desc:"Крафтовый бар с панковским духом, на территории старых московских мастерских. Здесь пьют и обсуждают музыку."},
+ {id:"letsrock",name:"Let's Rock Bar",addr:"Кузнецкий Мост, 4/3",metro:"Кузнецкий Мост",cat:"club",lat:55.7602,lng:37.6228,
+  desc:"Рок-бар на Кузнецком Мосту. Классическая точка встречи для любителей гитарной музыки."},
+ {id:"nighttrain",name:"Night Train",addr:"1-й Угрешский пр., 7",metro:"Дубровка",cat:"club",lat:55.7176,lng:37.6935,
+  desc:"Клуб на юго-востоке, в промышленном районе. Атмосфера подходит тем, кому нужна ночь, а не показной лоск."},
+ {id:"dex",name:"DEX Club",addr:"ул. Шарикоподшипниковская, 13, стр. 32",metro:"Дубровка",cat:"club",lat:55.7203,lng:37.6773,
+  desc:"Клубная площадка на бывшей промышленной территории. Большое пространство и вечеринки до утра."},
+ {id:"treff8",name:"TREFF8 Club",addr:"ул. Казакова, 8, стр. 2",metro:"Курская",cat:"club",lat:55.7650,lng:37.6640,
+  desc:"Клуб у Курского вокзала, куда приходят на музыку и танцы. Удобен, если вы приехали на поезде."},
+ {id:"mendeleev",name:"Mendeleev Bar & Music",addr:"ул. Петровка, 20/1",metro:"Чеховская",cat:"club",lat:55.7655,lng:37.6181,
+  desc:"Бар с музыкой на Петровке. Подходит для вечера в самом центре, если хочется чего-то живого."},
+ {id:"nevrotik",name:"Невротик",addr:"ул. Яузская, 5",metro:"Китай-город",cat:"club",lat:55.7494,lng:37.6475,
+  desc:"Небольшой бар у Яузы. Уютное место для разговоров рядом с Хитровкой и Солянкой."},
+ {id:"happyend",name:"Happy End Bar & Kitchen",addr:"Спиридоньевский пер., 9/1",metro:"Тверская",cat:"club",lat:55.7646,lng:37.6035,
+  desc:"Бар с кухней в тихом переулке у Патриарших. Можно поужинать и остаться на музыку."},
+ {id:"kozlov",name:"Клуб Алексея Козлова",addr:"ул. Маросейка, 9/2, стр. 1",metro:"Китай-город",cat:"club",lat:55.7563,lng:37.6362,
+  desc:"Музыкальный клуб на Маросейке, названный в честь известного саксофониста. Подходит для джаза и неспешного вечера."},
+ {id:"bix",name:"The BIX",addr:"Большой Козихинский пер., 9",metro:"Маяковская",cat:"club",lat:55.7640,lng:37.5975,
+  desc:"Клуб в районе Патриарших с живой музыкой. Хорошо заходит, если вечер начался с прогулки по Тверской."},
+ {id:"bambule",name:"Bambule Bar",addr:"ул. Солянка, 1/2",metro:"Китай-город",cat:"club",lat:55.7539,lng:37.6362,
+  desc:"Бар на Солянке, в нескольких минутах от Китай-города. Удобная остановка в середине вечера."},
+
+ /* Арт-пространства */
+ {id:"grafit",name:"Графит",addr:"Электродная ул., 2, стр. 32",metro:"Шоссе Энтузиастов",cat:"art",lat:55.7525,lng:37.7232,
+  desc:"Пространство на востоке Москвы, связанное со стрит-артом. Большие стены и промышленная архитектура вокруг."},
+ {id:"ruarts",name:"RuArts Gallery",addr:"1-й Зачатьевский пер., 10",metro:"Кропоткинская",cat:"art",lat:55.7424,lng:37.6029,
+  desc:"Частная галерея в тихом переулке у Остоженки. Выставки современного русского искусства."},
+ {id:"artplay",name:"ARCA / ARTPLAY",addr:"Нижняя Сыромятническая ул., 10, стр. 3",metro:"Курская",cat:"art",lat:55.7543,lng:37.6603,
+  desc:"Большой творческий кластер в бывших заводских корпусах. Студии, шоурумы и уличное искусство на территории."},
+ {id:"cube",name:"Cube.Moscow",addr:"Тверская ул., 3",metro:"Охотный Ряд",cat:"art",lat:55.7576,lng:37.6139,
+  desc:"Выставочное пространство в самом центре. Современное искусство и технологии, которые можно рассмотреть вблизи."},
+ {id:"ile",name:"Île Thélème",addr:"ул. Правды, 24/11",metro:"Савёловская",cat:"art",lat:55.7918,lng:37.5898,
+  desc:"Творческая территория в районе Савёловской. Мастерские и выставки в промышленных корпусах."},
+ {id:"exposed",name:"Art Center EXPOSED",addr:"Космодамианская наб., 52, стр. 11",metro:"Павелецкая",cat:"art",lat:55.7377,lng:37.6429,
+  desc:"Арт-центр на набережной Москвы-реки. Выставки и мероприятия в здании бывшей фабрики."},
+ {id:"streetlab",name:"Лаборатория стрит-арта",addr:"ул. Годовикова, 9, стр. 25",metro:"Алексеевская",cat:"art",lat:55.8081,lng:37.6403,
+  desc:"Площадка, где работают с уличным искусством. Подойдёт, если хочется узнать, как создаются работы на стенах города."},
+ {id:"garage",name:"Центр современного искусства «Гараж»",addr:"ул. Крымский Вал, 9, стр. 32",metro:"Парк культуры",cat:"art",lat:55.7285,lng:37.6016,
+  desc:"Один из главных центров современного искусства в Москве, расположенный в Парке Горького. Выставки, лекции и программы для молодёжи."},
+ {id:"eiphoria",name:"Арт-пространство «Эйфория»",addr:"Новый Арбат, 17",metro:"Арбатская",cat:"art",lat:55.7528,lng:37.5915,
+  desc:"Выставочное пространство на Новом Арбате. Хорошая остановка, если вы гуляете по центру."},
+ {id:"artspace",name:"ART-SPACE",addr:"Космодамианская наб., 52, стр. 11",metro:"Павелецкая",cat:"art",lat:55.7381,lng:37.6436,
+  desc:"Пространство в том же здании на Космодамианской набережной. Выставки и творческие события."},
+
+ /* Стрит-арт и дворы */
+ {id:"tsoy",name:"Стена Цоя",addr:"Арбат, 37/2, стр. 1",metro:"Смоленская",cat:"street",lat:55.7481,lng:37.5837,
+  desc:"Знаменитая стена в Старом Арбате, посвящённая Виктору Цою. Место паломничества поклонников рока."},
+ {id:"sahart",name:"САХАрт",addr:"Мантулинская ул., 7",metro:"Улица 1905 года",cat:"street",lat:55.7640,lng:37.5530,
+  desc:"Площадка с уличным искусством в районе Красной Пресни. Яркие работы на фасадах и во дворах."},
+ {id:"designzavod",name:"Территория дизайн-завода",addr:"Большая Новодмитровская ул., 36",metro:"Дмитровская",cat:"street",lat:55.8056,lng:37.5873,
+  desc:"Бывшая фабрика, превращённая в творческий кластер. Много граффити на корпусах и во дворе."},
+ {id:"dvinsev",name:"Улица Двинцев",addr:"ул. Двинцев, район Савёловской",metro:"Савёловская",cat:"street",lat:55.7945,lng:37.5860,
+  desc:"Улица в районе Савёловской с граффити на стенах промзоны. Хорошо смотреть днём, когда на ней немного людей."},
+ {id:"halturinskaya",name:"Халтуринская улица",addr:"Халтуринская ул., район Преображенского",metro:"Преображенская площадь",cat:"street",lat:55.7970,lng:37.7160,
+  desc:"Улица в Преображенском, где на стенах и заборах появляются новые работы. Подходит для неспешной прогулки."},
+ {id:"pogonny",name:"Погонный проезд",addr:"Погонный пр., район Богородского",metro:"Бульвар Рокоссовского",cat:"street",lat:55.8199,lng:37.7295,
+  desc:"Проезд в Богородском с граффити на заборах и стенах гаражей. Спальный район с неожиданными красками."},
+ {id:"otkrytoe",name:"Открытое шоссе",addr:"Открытое ш., район Метрогородка",metro:"Бульвар Рокоссовского",cat:"street",lat:55.8135,lng:37.7488,
+  desc:"Шоссе в районе Метрогородка. Работы здесь видно из окна автобуса, но интереснее пройтись пешком."},
+ {id:"himushina",name:"Улица Николая Химушина",addr:"ул. Николая Химушина, район Метрогородка",metro:"Бульвар Рокоссовского",cat:"street",lat:55.8152,lng:37.7562,
+  desc:"Улица в Метрогородке с яркими работами на домах. Хорошо комбинируется с Открытым шоссе."},
+ {id:"tyumensky",name:"Тюменский проезд",addr:"Тюменский пр., район Сокольников",metro:"Сокольники",cat:"street",lat:55.7957,lng:37.6895,
+  desc:"Проезд у Сокольников с граффити на стенах промышленных зданий. Рядом парк, куда можно уйти после прогулки."},
+ {id:"yablochkova",name:"Улица Яблочкова",addr:"ул. Яблочкова, район Бутырского",metro:"Тимирязевская",cat:"street",lat:55.8056,lng:37.5774,
+  desc:"Улица в Бутырском районе с работами на стенах и заборах. Подходит для прогулки после визита на дизайн-завод."},
+ {id:"dmitrievskogo",name:"Улица Дмитриевского",addr:"ул. Дмитриевского, район Косино-Ухтомского",metro:"Косино",cat:"street",lat:55.7090,lng:37.8530,
+  desc:"Улица на восточной окраине. Граффити здесь можно найти на домах и подземных переходах."},
+ {id:"zelenodolskaya",name:"Зеленодольская улица",addr:"Зеленодольская ул., район Кузьминок",metro:"Кузьминки",cat:"street",lat:55.7040,lng:37.7783,
+  desc:"Улица в Кузьминках, где на стенах домов появляются большие работы. Спокойный район для долгой прогулки."}
+];
+
+/* Маршруты. stops: id мест из списка выше. */
+var ROUTES = [
+ {id:"kitay",title:"Китай-город",district:"Китай-город, Хитровка, Солянка",time:"около 2,5 часов",
+  legend:"Старый центр без туристической толпы. Начинаете у Лубянки, заходите во дворы Маросейки, спускаетесь к Солянке и заканчиваете у Яузы. Между остановками несколько минут пешком.",
+  stops:["jao","kozlov","bambule","blanc","nevrotik"]},
+ {id:"pokrovka",title:"Покровка и Чистые пруды",district:"Покровка, Чистые пруды",time:"около 2 часов",
+  legend:"Прогулка по переулкам вокруг Чистых прудов. Маршрут идёт от Лубянки через Кривоколенный к Курской, с остановкой на кофе или чём-то крепче.",
+  stops:["defaqto","svoboda","drunkpunk","artplay"]},
+ {id:"baumanskaya",title:"Бауманская и Электрозаводская",district:"Курская, Бауманская, Красносельская",time:"около 3 часов",
+  legend:"Промышленный восток в Центральном округе. Начинаете в ARTPLAY, проходите мимо старых заводов и заканчиваете в панк-баре у Красносельской.",
+  stops:["artplay","treff8","punkfiction"]}
+];
+
+/* ---------- Вспомогательное ---------- */
+var byId = {};
+PLACES.forEach(function(p){ byId[p.id]=p; });
+
+function el(tag, attrs, html){
+  var n = document.createElement(tag);
+  if(attrs){ Object.keys(attrs).forEach(function(k){ n.setAttribute(k, attrs[k]); }); }
+  if(html!=null) n.innerHTML = html;
+  return n;
+}
+function esc(s){
+  return String(s).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];
+  });
+}
+function mono(name){
+  var m = name.replace(/[^A-Za-zА-Яа-яЁё0-9 ]/g,"").trim().split(/\s+/);
+  return (m[0]||"?").charAt(0).toUpperCase() + (m[1] ? m[1].charAt(0).toUpperCase() : "");
+}
+/* Фото места: файл photos/<id>.jpg. Если файла нет, остаётся цветная заглушка. */
+function photoImg(p){
+  return '<img src="photos/'+p.id+'.jpg" alt="'+esc(p.name)+'" loading="lazy" onerror="this.remove()">';
+}
+function yandexLink(p){
+  return "https://yandex.ru/maps/?text=" + encodeURIComponent("Москва, " + p.addr);
+}
+
+/* ---------- Карточка места ---------- */
+function cardHtml(p){
+  return '<article class="card">'
+    + '<div class="photo '+p.cat+'"><span class="mono">'+esc(mono(p.name))+'</span>'+photoImg(p)+'</div>'
+    + '<div class="card-body">'
+    + '<span class="tag">'+CATS[p.cat].label+'</span>'
+    + '<h3>'+esc(p.name)+'</h3>'
+    + '<p class="meta"><b>М</b> '+esc(p.metro)+'<br>'+esc(p.addr)+'</p>'
+    + '<p class="meta">'+esc(p.desc)+'</p>'
+    + '<button class="more" type="button" data-open="'+p.id+'">Подробнее</button>'
+    + '</div></article>';
+}
+
+/* ---------- Окно с подробностями ---------- */
+var dlg = document.getElementById("dlg");
+var lastFocus = null;
+function openPlace(id){
+  var p = byId[id]; if(!p) return;
+  lastFocus = document.activeElement;
+  dlg.innerHTML = '<div class="dlg" style="position:relative">'
+    + '<button class="dlg-close" type="button" data-close aria-label="Закрыть">×</button>'
+    + '<div class="photo '+p.cat+'"><span class="mono">'+esc(mono(p.name))+'</span>'+photoImg(p)+'</div>'
+    + '<div class="dlg-body">'
+    + '<span class="tag">'+CATS[p.cat].label+'</span>'
+    + '<h2 style="font-size:24px">'+esc(p.name)+'</h2>'
+    + '<p>'+esc(p.desc)+'</p>'
+    + '<dl class="dl"><dt>Адрес</dt><dd>'+esc(p.addr)+'</dd><dt>Метро</dt><dd>'+esc(p.metro)+'</dd></dl>'
+    + '<div class="btn-row"><a class="btn" target="_blank" rel="noopener" href="'+yandexLink(p)+'">Найти на Яндекс Картах</a></div>'
+    + '<p class="note">Перед визитом проверьте часы работы и афишу.</p>'
+    + '</div></div>';
+  if(typeof dlg.showModal === "function"){ dlg.showModal(); } else { dlg.setAttribute("open",""); }
+}
+dlg.addEventListener("click", function(e){
+  if(e.target === dlg || e.target.hasAttribute("data-close")){ dlg.close(); }
+});
+dlg.addEventListener("close", function(){ if(lastFocus && lastFocus.focus){ lastFocus.focus(); } });
+document.addEventListener("click", function(e){
+  var b = e.target.closest("[data-open]");
+  if(b){ openPlace(b.getAttribute("data-open")); }
+});
+
+/* ---------- Карта ---------- */
+var COLORS = {club:"#1c34c8", art:"#10131c", street:"#d4572a"};
+function makeMap(node){
+  if(!window.L){
+    node.innerHTML = '<div class="empty" style="margin:12px">Карта не загрузилась. Проверьте интернет и обновите страницу.</div>';
+    return null;
+  }
+  var map = L.map(node, {scrollWheelZoom:false}).setView([55.7558,37.6176], 11);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom:18, attribution:"© OpenStreetMap"
+  }).addTo(map);
+  map._layer = L.layerGroup().addTo(map);
+  return map;
+}
+function plot(map, list){
+  if(!map) return;
+  map._layer.clearLayers();
+  var pts = [];
+  list.forEach(function(p){
+    var m = L.circleMarker([p.lat,p.lng], {radius:8, color:"#fff", weight:2, fillColor:COLORS[p.cat], fillOpacity:1});
+    m.bindPopup('<span class="pop-title">'+esc(p.name)+'</span>'+esc(p.metro)
+      +'<br><button class="pop-btn" type="button" data-open="'+p.id+'">Карточка</button>');
+    m.addTo(map._layer);
+    pts.push([p.lat,p.lng]);
+  });
+  if(pts.length){ map.fitBounds(pts, {padding:[30,30], maxZoom:15}); }
+}
+
+/* ---------- Блок «поиск + фильтры + карта + карточки» ---------- */
+var explorers = {};
+function mountExplorer(rootId, cats){
+  var root = document.getElementById(rootId);
+  var pool = PLACES.filter(function(p){ return cats.indexOf(p.cat) > -1; });
+  var metros = Array.from(new Set(pool.map(function(p){ return p.metro; }))).sort(function(a,b){ return a.localeCompare(b,"ru"); });
+  var state = {q:"", metro:"", cat:"all"};
+
+  var chips = "";
+  if(cats.length > 1){
+    chips = '<div class="chips" role="group" aria-label="Тип места">'
+      + '<button class="chip" type="button" data-cat="all" aria-pressed="true">Все</button>'
+      + cats.map(function(c){ return '<button class="chip" type="button" data-cat="'+c+'" aria-pressed="false">'+CATS[c].label+'</button>'; }).join("")
+      + '</div>';
+  }
+  root.innerHTML = chips
+    + '<div class="controls">'
+    + '<div class="field"><label for="'+rootId+'-q">Поиск по названию или адресу</label><input id="'+rootId+'-q" type="search" autocomplete="off" placeholder="Например, Солянка"></div>'
+    + '<div class="field"><label for="'+rootId+'-m">Метро</label><select id="'+rootId+'-m"><option value="">Все станции</option>'
+    + metros.map(function(m){ return '<option>'+esc(m)+'</option>'; }).join("") + '</select></div>'
+    + '</div>'
+    + '<div class="map" id="'+rootId+'-map" role="region" aria-label="Карта мест"></div>'
+    + '<p class="map-note">Синие точки: клубы и бары. Чёрные: арт-пространства. Оранжевые: стрит-арт.</p>'
+    + '<p class="count" id="'+rootId+'-n" aria-live="polite"></p>'
+    + '<div class="grid" id="'+rootId+'-g"></div>';
+
+  var q = document.getElementById(rootId+"-q");
+  var m = document.getElementById(rootId+"-m");
+  var g = document.getElementById(rootId+"-g");
+  var n = document.getElementById(rootId+"-n");
+  var map = null;
+
+  function filtered(){
+    var s = state.q.trim().toLowerCase();
+    return pool.filter(function(p){
+      if(state.cat !== "all" && p.cat !== state.cat) return false;
+      if(state.metro && p.metro !== state.metro) return false;
+      if(s && (p.name+" "+p.addr).toLowerCase().indexOf(s) < 0) return false;
+      return true;
+    });
+  }
+  function render(){
+    var list = filtered();
+    g.innerHTML = list.length ? list.map(cardHtml).join("")
+      : '<div class="empty" style="grid-column:1/-1">Ничего не найдено. Измените запрос или сбросьте фильтры.</div>';
+    n.textContent = "Найдено мест: " + list.length;
+    plot(map, list);
+  }
+  q.addEventListener("input", function(){ state.q = q.value; render(); });
+  m.addEventListener("change", function(){ state.metro = m.value; render(); });
+  root.addEventListener("click", function(e){
+    var c = e.target.closest("[data-cat]");
+    if(!c) return;
+    state.cat = c.getAttribute("data-cat");
+    root.querySelectorAll("[data-cat]").forEach(function(x){ x.setAttribute("aria-pressed", x===c ? "true":"false"); });
+    render();
+  });
+
+  explorers[rootId] = {
+    show:function(){
+      if(!map){ map = makeMap(document.getElementById(rootId+"-map")); }
+      render();
+      if(map){ setTimeout(function(){ map.invalidateSize(); render(); }, 60); }
+    }
+  };
+}
+
+/* ---------- Главная ---------- */
+function mountHome(){
+  var featured = ["16tons","jao","grafit","garage","tsoy","artplay"].map(function(id){ return byId[id]; });
+  document.getElementById("featured").innerHTML = featured.map(cardHtml).join("");
+  var c = {club:0, art:0, street:0};
+  PLACES.forEach(function(p){ c[p.cat]++; });
+  document.getElementById("stats").innerHTML =
+    '<span><b>'+c.club+'</b>клубов и баров</span>'
+   +'<span><b>'+c.art+'</b>арт-пространств</span>'
+   +'<span><b>'+c.street+'</b>точек стрит-арта</span>'
+   +'<span><b>'+ROUTES.length+'</b>маршрута</span>';
+}
+
+/* ---------- Маршруты ---------- */
+var routeMap = null, currentRoute = 0;
+function mountRoutes(){
+  var tabs = document.getElementById("routeTabs");
+  tabs.innerHTML = ROUTES.map(function(r,i){
+    return '<button class="chip" type="button" data-route="'+i+'" aria-pressed="'+(i===0)+'">'+esc(r.title)+'</button>';
+  }).join("");
+  tabs.addEventListener("click", function(e){
+    var b = e.target.closest("[data-route]"); if(!b) return;
+    currentRoute = +b.getAttribute("data-route");
+    tabs.querySelectorAll("[data-route]").forEach(function(x){ x.setAttribute("aria-pressed", x===b ? "true":"false"); });
+    showRoute();
+  });
+}
+function showRoute(){
+  var r = ROUTES[currentRoute];
+  var stops = r.stops.map(function(id){ return byId[id]; });
+  var view = document.getElementById("routeView");
+  var oldMap = routeMap; routeMap = null;
+  if(oldMap){ oldMap.remove(); }
+  view.innerHTML = '<div class="route-info">'
+    + '<h2>'+esc(r.title)+'</h2>'
+    + '<div class="facts"><span>Время: <b>'+esc(r.time)+'</b></span><span>Остановок: <b>'+stops.length+'</b></span><span>Район: <b>'+esc(r.district)+'</b></span></div>'
+    + '<p>'+esc(r.legend)+'</p>'
+    + '<ol class="steps">' + stops.map(function(p){
+        return '<li><b>'+esc(p.name)+'</b><span>'+esc(p.addr)+' · м. '+esc(p.metro)+'</span>'
+          + '<button class="more" type="button" style="background:none;border:0;padding:4px 0 0;color:var(--accent);font-weight:600;cursor:pointer" data-open="'+p.id+'">Подробнее</button></li>';
+      }).join("") + '</ol></div>'
+    + '<div><div class="map" id="routeMap" role="region" aria-label="Карта маршрута"></div><p class="map-note" style="margin-top:8px">Линия показывает порядок остановок по прямой. Пешеходный путь строите по своим навигаторам.</p></div>';
+  routeMap = makeMap(document.getElementById("routeMap"));
+  if(routeMap){
+    var pts = stops.map(function(p){ return [p.lat,p.lng]; });
+    L.polyline(pts, {color:"#1c34c8", weight:4, opacity:.75, dashArray:"2 8"}).addTo(routeMap._layer);
+    stops.forEach(function(p,i){
+      var mk = L.marker([p.lat,p.lng], {icon:L.divIcon({className:"", iconSize:[28,28], iconAnchor:[14,14],
+        html:'<div style="width:28px;height:28px;border-radius:50%;background:#1c34c8;color:#fff;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font:700 13px Inter,sans-serif">'+(i+1)+'</div>'})});
+      mk.bindPopup('<span class="pop-title">'+esc(p.name)+'</span>'+esc(p.addr)
+        +'<br><button class="pop-btn" type="button" data-open="'+p.id+'">Карточка</button>');
+      mk.addTo(routeMap._layer);
+    });
+    routeMap.fitBounds(pts, {padding:[36,36], maxZoom:16});
+    setTimeout(function(){ routeMap.invalidateSize(); routeMap.fitBounds(pts, {padding:[36,36], maxZoom:16}); }, 60);
+  }
+}
+
+/* ---------- Форма «Предложить место» ---------- */
+function mountForm(){
+  var form = document.getElementById("suggestForm");
+  var out = document.getElementById("formOut");
+  var err = document.getElementById("formErr");
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    var d = new FormData(form);
+    var name = (d.get("name")||"").trim(), addr = (d.get("addr")||"").trim();
+    if(!name || !addr){ err.hidden = false; return; }
+    err.hidden = true;
+    var body = "Название: "+name+"\nАдрес: "+addr+"\nТип: "+d.get("type")+"\nЧем интересно: "+(d.get("why")||"").trim()+"\nСсылка: "+(d.get("link")||"").trim();
+    var href = "mailto:"+SUGGEST_EMAIL+"?subject="+encodeURIComponent("Новое место для Подземки: "+name)+"&body="+encodeURIComponent(body);
+    out.innerHTML = '<strong>Письмо готово.</strong>'
+      + '<a class="btn" href="'+href+'">Открыть почтовую программу</a>'
+      + '<span>Если почта не открылась, отправьте этот текст на <b>'+esc(SUGGEST_EMAIL)+'</b>:</span>'
+      + '<pre>'+esc(body)+'</pre>';
+    out.classList.add("show");
+  });
+}
+
+/* ---------- Навигация между страницами ---------- */
+var PAGES = ["home","clubs","art","street","routes","about"];
+var shown = {};
+function go(page, scrollTo){
+  if(PAGES.indexOf(page) < 0){ page = "home"; }
+  PAGES.forEach(function(p){
+    document.getElementById("page-"+p).classList.toggle("active", p===page);
+  });
+  document.querySelectorAll("nav a").forEach(function(a){
+    if(a.getAttribute("data-nav")===page){ a.setAttribute("aria-current","page"); } else { a.removeAttribute("aria-current"); }
+  });
+  document.getElementById("nav").classList.remove("open");
+  document.getElementById("burger").setAttribute("aria-expanded","false");
+
+  var ex = {home:"ex-home", clubs:"ex-clubs", art:"ex-art", street:"ex-street"}[page];
+  if(ex && explorers[ex]){ explorers[ex].show(); }
+  if(page==="routes"){ showRoute(); }
+
+  if(scrollTo){
+    var t = document.getElementById(scrollTo);
+    if(t){ setTimeout(function(){ t.scrollIntoView({behavior:"smooth", block:"start"}); }, 80); return; }
+  }
+  window.scrollTo(0,0);
+}
+function fromHash(){
+  var h = (location.hash||"").replace("#","");
+  if(h==="explore"){ go("home","explore"); return; }
+  go(h || "home");
+}
+window.addEventListener("hashchange", fromHash);
+document.addEventListener("click", function(e){
+  var a = e.target.closest("[data-scroll]");
+  if(a){ var s = a.getAttribute("data-scroll"); setTimeout(function(){
+      var t = document.getElementById(s); if(t){ t.scrollIntoView({behavior:"smooth",block:"start"}); } }, 120); }
+});
+
+var burger = document.getElementById("burger");
+burger.addEventListener("click", function(){
+  var nav = document.getElementById("nav");
+  var open = nav.classList.toggle("open");
+  burger.setAttribute("aria-expanded", open ? "true":"false");
+});
+
+/* Запуск */
+mountHome();
+mountExplorer("ex-home", ["club","art","street"]);
+mountExplorer("ex-clubs", ["club"]);
+mountExplorer("ex-art", ["art"]);
+mountExplorer("ex-street", ["street"]);
+mountRoutes();
+mountForm();
+fromHash();
+
+})();
+</script>
+</body>
+</html>
